@@ -24,7 +24,8 @@ class Socket extends EventEmitter
       @emit "open"
     
     ws.on "message", (buffer) =>
-      @emit "message", Frame.fromString(buffer)
+      frame = Frame.fromString(buffer)
+      @emit "message", frame
     
     ws.on "error", (err) =>
       @emit "error", err
@@ -36,8 +37,10 @@ class Socket extends EventEmitter
     {command} = frame
     unless COMMANDS.has(command)
       throw new Error("Bad command: #{ command }")
-    @ws.send Frame.toString(frame), (err) =>
-      @emit "error", err
+    message = Frame.toString(frame)
+    @ws.send message, (err) =>
+      if err
+        @emit "error", err
   
   close: ->
     @ws.close()
