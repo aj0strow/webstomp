@@ -1,6 +1,5 @@
 assert = require "assert"
 Frame = require "./frame"
-Util = require "util"
 
 describe "Stomp Frame", ->
   describe "toString", ->
