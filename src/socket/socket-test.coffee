@@ -43,6 +43,11 @@ describe "Stomp Socket", ->
       @socket.on "close", =>
         done()
       @ws.emit "close"
+    
+    it "should relay open events", (done) ->
+      @socket.on "open", =>
+        done()
+      @ws.emit "open"
 
   describe "close", ->
     it "should close socket", ->

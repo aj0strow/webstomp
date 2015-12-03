@@ -20,6 +20,9 @@ class Socket extends EventEmitter
   constructor: (ws) ->
     @ws = ws
     
+    ws.on "open", =>
+      @emit "open"
+    
     ws.on "message", (buffer) =>
       @emit "message", Frame.fromString(buffer)
     
