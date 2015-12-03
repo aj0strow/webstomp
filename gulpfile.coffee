@@ -5,14 +5,15 @@ mocha = require "gulp-mocha"
 
 gulp.task "default", [ "dev" ]
 
-gulp.task "dev", [ "clean" ], ->
-  gulp.watch("src/**/*", [ "test" ])
+gulp.task "dev", [ "test" ], ->
+  return gulp.watch("src/**/*", [ "test" ])
 
 gulp.task "clean", ->
-  return del("dist")
+  return del("dist/**")
 
-gulp.task "compile", ->
+gulp.task "compile", [ "clean" ], ->
   return gulp.src("src/**/*.coffee")
+    .pipe coffee()
     .pipe gulp.dest("dist")
 
 gulp.task "test", [ "compile" ], ->

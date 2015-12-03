@@ -8,11 +8,14 @@
     "coffee-script": "^1.10.0",
     "del": "^2.1.0",
     "gulp": "^3.9.0",
+    "gulp-clean": "^0.3.1",
     "gulp-mocha": "^2.2.0",
     "mocha": "2.3.4"
   },
   "scripts": {
     "test": "gulp test"
   },
-  "dependencies": {}
+  "dependencies": {
+    "lodash": "^3.10.1"
+  }
 }
