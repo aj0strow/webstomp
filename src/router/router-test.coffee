@@ -27,6 +27,18 @@ describe "Stomp Router", ->
     @router.dispatch({ headers }, done)
 
   it "should match on command", (done) ->
+    @router.subscribe "*", (context, next) ->
+      assert.fail()
+    
+    @router.connect (context, next) ->
+      done()
+    
+    context = 
+      command: "CONNECT"
+      headers: {}
+    @router.dispatch(context, done)
+
+  it "should match on command and path", (done) ->
     @router.subscribe "/message", (context, next) ->
       assert.fail()
       

@@ -1,6 +1,7 @@
 {EventEmitter} = require "events"
 pathToRegexp = require "path-to-regexp"
 async = require "async"
+Server = require "../server"
 
 COMMANDS = [
   "connect"
@@ -13,15 +14,16 @@ COMMANDS = [
 class Router extends EventEmitter
   constructor: ->
     @routes = []
-
+  
   dispatch: (context, next) ->
     iterator = (route, next) ->
       route(context, next)
     async.eachSeries @routes, iterator, next
 
   use: (path, func) ->
-    if !func
-      [ func, path ] = [ path, null ]  
+    unless path && func
+      func ||= path
+      path = null
     route = switch
       when func instanceof Router
         func.dispatch.bind(func)
@@ -33,7 +35,10 @@ class Router extends EventEmitter
 
 COMMANDS.forEach (command) ->
   Router.prototype[command] = (path, func) ->
-    return @use path, withCommand(func, command.toUpperCase())
+    unless path && func
+      func ||= path
+      path = null
+    @use path, withCommand(func, command.toUpperCase())
 
 withPath = (func, path) ->
   # Parse path regexp
