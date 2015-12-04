@@ -4,6 +4,10 @@ Read about [STOMP protocol here](https://stomp.github.io/index.html).
 
 It seems STOMP is an under-used protocol and perfectly suited to sit on top of persistent WebSocket connections. My hope is this package will provide structure so writing STOMP servers is as simple as writing HTTP servers. 
 
+The motivation for using STOMP instead of `socket.io` or `SocketCluster` or `Sails` or `ActionCable` or what have you is that STOMP is an open protocol which can run on any client that supports TCP connections. 
+
+It's true this package uses WebSockets, but your future project doesn't have to. 
+
 ### Frame
 
 Each message between client and server is a "frame", which looks like:
@@ -16,7 +20,7 @@ Each message between client and server is a "frame", which looks like:
 }
 ```
 
-The protocol defines which commands and headers are valid. It checks if the command is correct, but certainly doesn't check headers (yet). 
+The protocol defines which commands and headers are valid. This package checks if the command is correct, but doesn't check headers (yet). 
 
 ### Socket
 
@@ -34,7 +38,9 @@ socket.on("message", function (frame) {
 })
 
 socket.send({ command, headers, body }, function (err) {
-  // failed to send :(
+  if (err) {
+    // failed to send :(
+  }
 })
 ```
 
@@ -51,13 +57,13 @@ server.on("connection", function (socket) {
 })
 ```
 
-Ok, you're bored. I get it. Bear with me.
+Ok, you're bored. I get it. We're just getting started tho.
 
 ### Session
 
-Sockets are pretty basic though, we can do better. STOMP sessions make some assumptions to provide convenience. It encodes js objects and arrays as JSON and adds headers, and writes js errors as error packets. 
+Sockets are pretty basic. You want more power. STOMP sessions make some assumptions to provide convenience. It encodes js objects and arrays as JSON and adds headers, and writes js errors as error packets. 
 
-You can send frames by verb for a shorter method call. 
+You can send frames by command name for a shorter method call as well. 
 
 ```js
 var {Session} = require("stomp")
@@ -77,7 +83,7 @@ session.message(data, headers)
 session.error(new Error("Bad arguments"))
 ```
 
-This allows for higher-level helpers, like piping an observable. So we're taking `es-observable`, `kefir`, `baconjs`, `event-stream`, that kind of thing. 
+This allows for higher-level helpers, like piping an observable. We're talking `es-observable`, `kefir`, `baconjs`, `event-stream`, that kind of thing. 
 
 ```js
 // When client subscribes
@@ -91,7 +97,7 @@ This allows you to create services/modules that return a stream, and pipe that s
 
 ### Router
 
-So we want services and modules returning streams. The next step is to add structure to keep logic separate. Artists steal, right?
+So we want services and modules returning streams. The next step is to add structure to organize routes. I've been told great artists steal, so this router is eerily similar to another one you might have seen around. 
 
 ```js
 var {Router} = require("stomp")
