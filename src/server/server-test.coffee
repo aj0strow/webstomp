@@ -4,7 +4,7 @@ Socket = require "../socket"
 assert = require "assert"
 portfinder = require "portfinder"
 
-describe.only "Stomp Server", ->
+describe "Stomp Server", ->
   beforeEach (done) ->
     portfinder.getPort (err, port) =>
       if err
