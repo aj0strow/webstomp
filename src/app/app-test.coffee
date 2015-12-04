@@ -29,7 +29,18 @@ describe "Stomp App", ->
       @app.disconnect ->
         done()
       @socket.emit "close"
-  
+    
+    it "should proto inherit the session", (done) ->
+      @app.use (context, next) ->
+        context.context.ok = true
+        next()
+      
+      @app.use (context) ->
+        assert context.context.ok
+        done()
+      
+      @socket.emit "message", {}
+        
   describe "listen", ->
     beforeEach (done) ->
       portfinder.getPort (err, port) =>

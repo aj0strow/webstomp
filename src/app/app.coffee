@@ -7,22 +7,22 @@ class App extends Router
   accept: (socket) ->
     session = new Session(socket)
     
-    dispatch = (context) =>
+    dispatch = (frame) =>
+      context = Object.create(session)
+      assign(context, frame, context: session.context)
       @dispatch context, (err) =>
         if err
           @emit "error", err
     
     socket.on "message", (frame) ->
-      context = Object.create(session)
-      dispatch assign(context, frame)
+      dispatch frame
     
     socket.on "close", ->
       # Ensure disconnect is called at least once
-      context = Object.create(session)
       frame = 
         command: "DISCONNECT"
         headers: {}
-      dispatch assign(context, frame)
+      dispatch frame
   
   listen: (port) ->
     server = new Server(port: port)
