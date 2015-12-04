@@ -13,7 +13,7 @@ describe "Stomp Router", ->
       assert context.ok
       next()
     @router.dispatch({}, done)
-
+  
   it "should match on path", (done) ->
     @router.use "/some/path", ->
       assert.fail()
@@ -56,12 +56,11 @@ describe "Stomp Router", ->
       context.ok = true
       next()
     
-    @router .use subrouter
+    @router.use subrouter
     
     @router.use (context, next) ->
       assert context.ok
       next()
     
     @router.dispatch({}, done)
-
 

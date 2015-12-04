@@ -17,7 +17,7 @@ class Router extends EventEmitter
   
   dispatch: (context, next) ->
     iterator = (route, next) ->
-      route(context, next)
+      route.call(context, context, next)
     async.eachSeries @routes, iterator, next
 
   use: (path, func) ->
