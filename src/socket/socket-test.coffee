@@ -16,6 +16,12 @@ describe "Stomp Socket", ->
         @socket.send
           command: "GARBAGE"
     
+    it "should break on invalid command", ->
+      assert.throws =>
+        @socket.send
+          command: "CONNECT"
+          body: "This is not allowed."
+    
     it "should send string packet", ->
       @socket.send command: "CONNECTED"
       packet = @ws.send.getCall(0).args[0]

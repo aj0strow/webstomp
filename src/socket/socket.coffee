@@ -16,6 +16,12 @@ COMMANDS = new Set([
   "ERROR"
 ])
 
+COMMANDS_WITH_BODY = new Set([
+  "SEND"
+  "MESSAGE"
+  "ERROR"
+])
+
 class Socket extends EventEmitter
   constructor: (ws) ->
     @ws = ws
@@ -34,9 +40,11 @@ class Socket extends EventEmitter
       @emit "close"
   
   send: (frame) ->
-    {command} = frame
+    {command, body} = frame
     unless COMMANDS.has(command)
       throw new Error("Bad command: #{ command }")
+    if body and !COMMANDS_WITH_BODY.has(command)
+      throw new Error("Bad frame: #{command} must not have body")
     message = Frame.toString(frame)
     @ws.send message, (err) =>
       if err
