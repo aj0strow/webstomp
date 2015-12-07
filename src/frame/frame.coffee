@@ -56,8 +56,9 @@ exports.fromString = (s) ->
       throw new Error("Invalid header: " + line)
     
     key = line.substr(0, sep)
-    value = line.substr(sep + 1)
-    headers[key] = value
+    unless headers[key]
+      value = line.substr(sep + 1)
+      headers[key] = value
   
   if headers['content-length']
     headers['content-length'] = parseInt(headers['content-length'], 10)

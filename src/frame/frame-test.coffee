@@ -56,6 +56,16 @@ describe "Stomp Frame", ->
       assert.equal frame.headers["destination"], "/orders"
       assert.equal frame.headers["content-type"], "application/json; charset=utf-8"
       assert.equal frame.body, '{"quantity":10}'
+    
+    it "should should prefer earlier duplicate headers", ->
+      packet = [
+        "MESSAGE",
+        "foo:OK",
+        "foo:Not Ok",
+        "\0",
+      ].join("\n")
+      frame = Frame.fromString(packet)
+      assert.equal frame.headers["foo"], "OK"
       
       
       
