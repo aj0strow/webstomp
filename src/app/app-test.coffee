@@ -15,8 +15,8 @@ describe "Stomp App", ->
       @app.accept @socket
 
     it "should dispatch socket messages", ->
-      @app.connect (client) ->
-        client.connected()
+      @app.connect (next) ->
+        @connected()
       
       frame = 
         command: "CONNECT"
@@ -31,12 +31,12 @@ describe "Stomp App", ->
       @socket.emit "close"
     
     it "should proto inherit the session", (done) ->
-      @app.use (context, next) ->
-        context.context.ok = true
+      @app.use (next) ->
+        @context.ok = true
         next()
       
-      @app.use (context) ->
-        assert context.context.ok
+      @app.use (next) ->
+        assert @context.ok
         done()
       
       @socket.emit "message", {}

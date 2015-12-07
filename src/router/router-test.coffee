@@ -6,31 +6,31 @@ describe "Stomp Router", ->
     @router = new Router()
 
   it "should dispatch routes in series", (done) ->
-    @router.use (context, next) ->
-      context.ok = true
+    @router.use (next) ->
+      @ok = true
       next()
-    @router.use (context, next) ->
-      assert context.ok
+    @router.use (next) ->
+      assert @ok
       next()
     @router.dispatch({}, done)
   
   it "should match on path", (done) ->
-    @router.use "/some/path", ->
+    @router.use "/some/path", (next) ->
       assert.fail()
     @router.dispatch({ headers: {} }, done)
 
   it "should add path params", (done) ->
-    @router.use "/users/:id", (context, next) ->
-      assert.equal context.params.id, "5"
+    @router.use "/users/:id", (next) ->
+      assert.equal @params.id, "5"
       next()
     headers = { "destination": "/users/5" }
     @router.dispatch({ headers }, done)
 
   it "should match on command", (done) ->
-    @router.subscribe "*", (context, next) ->
+    @router.subscribe "*", (next) ->
       assert.fail()
     
-    @router.connect (context, next) ->
+    @router.connect (next) ->
       done()
     
     context = 
@@ -39,10 +39,10 @@ describe "Stomp Router", ->
     @router.dispatch(context, done)
 
   it "should match on command and path", (done) ->
-    @router.subscribe "/message", (context, next) ->
+    @router.subscribe "/message", (next) ->
       assert.fail()
       
-    @router.send "/message", (context, next) ->
+    @router.send "/message", (next) ->
       next()
       
     context =
@@ -52,14 +52,14 @@ describe "Stomp Router", ->
 
   it "should mount routers", (done) ->
     subrouter = new Router()
-    subrouter.use (context, next) ->
-      context.ok = true
+    subrouter.use (next) ->
+      @ok = true
       next()
     
     @router.use subrouter
     
-    @router.use (context, next) ->
-      assert context.ok
+    @router.use (next) ->
+      assert @ok
       next()
     
     @router.dispatch({}, done)

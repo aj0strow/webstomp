@@ -17,7 +17,7 @@ class Router extends EventEmitter
   
   dispatch: (context, next) ->
     iterator = (route, next) ->
-      route.call(context, context, next)
+      route.call(context, next)
     async.eachSeries @routes, iterator, next
 
   use: (path, func) ->
@@ -26,7 +26,8 @@ class Router extends EventEmitter
       path = null
     route = switch
       when func instanceof Router
-        func.dispatch.bind(func)
+        (next) ->
+          func.dispatch(this, next)
       when path
         withPath(func, path)
       else
@@ -47,11 +48,11 @@ withPath = (func, path) ->
   emitter = this
   
   # Check path and populate params
-  return (context, next) ->
+  return (next) ->
     params = {}
     
     # Early exit if wrong type of command
-    path = context.headers["destination"]
+    path = @headers["destination"]
     return next() unless path
     
     # Early exit if wrong path
@@ -61,14 +62,14 @@ withPath = (func, path) ->
     # Get route params
     keys.forEach (key, i) ->
       params[key.name] = match[i + 1]
-    context.params = params
+    @params = params
     
     # Proxy func finally
     func.apply(this, arguments)
 
 withCommand = (func, command) ->
-  return (context, next) ->
-    if context.command == command
+  return (next) ->
+    if @command == command
       func.apply(this, arguments)
     else
       next()
