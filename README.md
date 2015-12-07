@@ -104,7 +104,7 @@ var {Router} = require("stomp")
 
 var router = new Router()
 
-router.use(function (context, next) {
+router.use(function (next) {
   // proceed to next
   next()
   
@@ -146,7 +146,7 @@ It's starting to look nice, eh.
 
 Finally, the app ties it all together. It opens a STOMP (websocket) server, acts like a router, and dispatches client request frames (to itself). 
 
-```
+```js
 var {App} = require("stomp")
 var app = new App()
 
