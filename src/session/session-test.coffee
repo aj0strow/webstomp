@@ -23,6 +23,11 @@ describe "Stomp Session", ->
       body: "Hello friend"
     @session.send frame
   
+  it "should not emit null error", (done) ->
+    @socket.send (message, f) -> f(null)
+    @session.on "error", done
+    setTimeout done, 2
+  
   it "should not send after socket closes", ->
     @socket.emit "close"
     @session.send command: "invalid"

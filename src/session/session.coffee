@@ -13,7 +13,8 @@ class Session extends EventEmitter
   send: (frame) ->
     if @open
       @socket.send frame, (err) =>
-        @emit "error", err
+        if err
+          @emit "error", err
   
   connected: (headers) ->    
     @send
