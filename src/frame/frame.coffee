@@ -27,6 +27,9 @@ exports.fromString = (s) ->
   loop
     # Parse line
     end = s.indexOf("\n", start)
+    if end == -1
+      throw new Error("Invalid packet")
+    
     line = s.substr(start, end - start)
     start = end + 1
     

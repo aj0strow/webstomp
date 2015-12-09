@@ -66,6 +66,9 @@ describe "Stomp Frame", ->
       ].join("\n")
       frame = Frame.fromString(packet)
       assert.equal frame.headers["foo"], "OK"
-      
+    
+    it "should throw on one-line packet", ->
+      assert.throws ->
+        Frame.fromString("CONNECT")
       
       
