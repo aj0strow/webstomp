@@ -26,6 +26,13 @@ describe "Stomp Socket", ->
       @socket.send command: "CONNECTED"
       packet = @ws.send.getCall(0).args[0]
       assert /CONNECTED/.test(packet)
+    
+    it "should pass send errors", (done) ->
+      @ws.send = (data, f) ->
+        f(new Error())
+      @socket.send { command: "ERROR" }, (err) ->
+        assert err
+        done()
   
   describe "events", ->
     it "should parse and trigger message", (done) ->

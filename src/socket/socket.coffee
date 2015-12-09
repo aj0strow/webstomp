@@ -39,16 +39,14 @@ class Socket extends EventEmitter
     ws.on "close", =>
       @emit "close"
   
-  send: (frame) ->
+  send: (frame, onError) ->
     {command, body} = frame
     unless COMMANDS.has(command)
       throw new Error("Bad command: #{ command }")
     if body and !COMMANDS_WITH_BODY.has(command)
       throw new Error("Bad frame: #{command} must not have body")
     message = Frame.toString(frame)
-    @ws.send message, (err) =>
-      if err
-        @emit "error", err
+    @ws.send message, onError
   
   close: ->
     @ws.close()
