@@ -7,6 +7,9 @@ class App extends Router
   accept: (socket) ->
     session = new Session(socket)
     
+    session.on "error", (err) =>
+      @emit "error", err
+    
     dispatch = (frame) =>
       context = Object.create(session)
       assign(context, frame, context: session.context)

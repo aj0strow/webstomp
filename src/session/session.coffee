@@ -5,10 +5,14 @@ class Session extends EventEmitter
   constructor: (socket) ->
     @socket = socket
     @context = {}
+    @open = true
+        
+    socket.on "close", =>
+      @open = false
   
   send: (frame) ->
-    @socket.send frame, (err) =>
-      if err
+    if @open
+      @socket.send frame, (err) =>
         @emit "error", err
   
   connected: (headers) ->    

@@ -23,6 +23,10 @@ describe "Stomp Session", ->
       body: "Hello friend"
     @session.send frame
   
+  it "should not send after socket closes", ->
+    @socket.emit "close"
+    @session.send command: "invalid"
+  
   it "should send connected frames", ->
     @session.connected session: "user-123"
     frame = @socket.send.getCall(0).args[0]
