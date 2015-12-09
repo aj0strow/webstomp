@@ -6,10 +6,10 @@ class Session extends EventEmitter
     @socket = socket
     @context = {}
     @open = true
-        
+    
     socket.on "close", =>
       @open = false
-  
+    
   send: (frame) ->
     if @open
       @socket.send frame, (err) =>
