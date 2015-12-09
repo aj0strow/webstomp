@@ -30,8 +30,11 @@ class Socket extends EventEmitter
       @emit "open"
     
     ws.on "message", (buffer) =>
-      frame = Frame.fromString(buffer)
-      @emit "message", frame
+      try
+        frame = Frame.fromString(buffer)
+        @emit "message", frame
+      catch err
+        @emit "error", err
     
     ws.on "error", (err) =>
       @emit "error", err

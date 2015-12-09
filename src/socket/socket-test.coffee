@@ -45,7 +45,15 @@ describe "Stomp Socket", ->
         assert.equal message.command, "DISCONNECT"
         done()
       @ws.emit "message", packet
-  
+    
+    it "should emit errors on bad data", (done) ->
+      packet = [
+        "CONNECT"
+      ].join("\n")
+      @socket.on "error", ->
+        done()
+      @ws.emit "message", packet
+    
     it "should relay errors", (done) ->
       @socket.on "error", (err) ->
         assert.equal err.message, "Guns"
