@@ -171,7 +171,7 @@ var http = require("http")
 var stomp = require("stomp")()
 var api = require("express")()
 
-var server = stomp.mount(server: http.createServer(api))
+var server = stomp.mount({ server: http.createServer(api) })
 server.listen(port, function () {
   console.log("open for business")
 })
