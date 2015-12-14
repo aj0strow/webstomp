@@ -42,6 +42,12 @@ describe "Stomp App", ->
       
       @socket.emit "message", {}
   
+  describe "mount", ->
+    it "should attach to params for wss", ->
+      httpServer = http.createServer(-> null)
+      app = new App()
+      app.mount(server: httpServer)
+  
   describe "listen", ->
     beforeEach (done) ->
       portfinder.getPort (err, port) =>
@@ -49,13 +55,6 @@ describe "Stomp App", ->
           return done(err)
         @port = port
         done()
-    
-    it "should attach to existing server", (done) ->
-      httpServer = http.createServer (req, res) ->
-        # do nothing
-      @app = new App()
-      server = @app.listen(server: httpServer)
-      done()
     
     it "should accept connections", (done) ->
       @app = new App()

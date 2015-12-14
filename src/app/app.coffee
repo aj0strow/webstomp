@@ -28,15 +28,12 @@ class App extends Router
       dispatch frame
     return null
   
-  createServer: (params) ->
-    return new Server(params)
-  
-  listen: (params) ->
-    unless isNaN(params)
-      port = params
-      params = { port: port }
-    server = @createServer(params)
+  mount: (params) ->
+    server = new Server(params)
     server.on "connection", @accept.bind(@)
     return server
+  
+  listen: (port) ->
+    return @mount(port: port)
 
 module.exports = App

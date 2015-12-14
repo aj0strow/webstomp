@@ -162,6 +162,21 @@ app.use(function () {
 app.listen(8080)
 ```
 
+### Mount Http Server
+
+Instead of listening directly, you can mount a stomp websocket server on an http server, which allows you to use express or other http frameworks too. 
+
+```js
+var http = require("http")
+var stomp = require("stomp")()
+var api = require("express")()
+
+var server = stomp.mount(server: http.createServer(api))
+server.listen(port, function () {
+  console.log("open for business")
+})
+```
+
 So there's my concept. For real-time apps, on-demand PUB/SUB channels are very practical, and play nicely with React component lifecycles.
 
 **MIT License**
