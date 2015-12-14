@@ -5,6 +5,7 @@ assert = require "assert"
 portfinder = require "portfinder"
 WebSocket = require "ws"
 Socket = require "../socket"
+http = require "http"
 
 describe "Stomp App", ->
   describe "accept", ->
@@ -40,7 +41,7 @@ describe "Stomp App", ->
         done()
       
       @socket.emit "message", {}
-        
+  
   describe "listen", ->
     beforeEach (done) ->
       portfinder.getPort (err, port) =>
@@ -48,6 +49,13 @@ describe "Stomp App", ->
           return done(err)
         @port = port
         done()
+    
+    it "should attach to existing server", (done) ->
+      httpServer = http.createServer (req, res) ->
+        # do nothing
+      @app = new App()
+      server = @app.listen(server: httpServer)
+      done()
     
     it "should accept connections", (done) ->
       @app = new App()

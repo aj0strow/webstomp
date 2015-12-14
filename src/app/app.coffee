@@ -26,11 +26,17 @@ class App extends Router
         command: "DISCONNECT"
         headers: {}
       dispatch frame
+    return null
   
-  listen: (port) ->
-    server = new Server(port: port)
-    server.on "connection", (socket) =>
-      @accept socket
+  createServer: (params) ->
+    return new Server(params)
+  
+  listen: (params) ->
+    unless isNaN(params)
+      port = params
+      params = { port: port }
+    server = @createServer(params)
+    server.on "connection", @accept.bind(@)
     return server
 
 module.exports = App
