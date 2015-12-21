@@ -1,5 +1,5 @@
 {EventEmitter} = require "events"
-{assign, isString} = require "lodash"
+{assign, isArray, isObject} = require "lodash"
 
 class Session extends EventEmitter
   constructor: (socket) ->
@@ -22,10 +22,10 @@ class Session extends EventEmitter
       headers: assign({ version: "1.2" }, headers)
   
   message: (body, headers) ->
-    unless isString body
+    if isArray(body) || isObject(body)
       body = JSON.stringify body
       contentType = "application/json; charset=utf-8"
-      headers = assign { "content-type": contentType }, headers 
+      headers = assign { "content-type": contentType }, headers
     @send
       command: "MESSAGE"
       headers: headers
@@ -41,7 +41,7 @@ class Session extends EventEmitter
       @message body, headers
     sendError = (err) =>
       @error err
-  
+    
     observable.onValue sendMessage
     observable.onError sendError
     

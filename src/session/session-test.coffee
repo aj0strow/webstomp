@@ -50,6 +50,11 @@ describe "Stomp Session", ->
     assert /json/.test frame.headers["content-type"]
     assert.equal frame.body, '[{"a":1}]'
   
+  it "should not encode null json", ->
+    @session.message null
+    frame = @socket.send.getCall(0).args[0]
+    assert.equal frame.body, null
+  
   it "should send errors", ->
     @session.error new Error "Snow"
     frame = @socket.send.getCall(0).args[0]
