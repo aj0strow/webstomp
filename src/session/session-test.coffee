@@ -96,11 +96,3 @@ describe "Stomp Session", ->
         assert !@socket.send.called
         done()
       setTimeout check, 2
-            
-      
-      
-  it "should observe kefir streams", ->
-    
-    
-    
-    
