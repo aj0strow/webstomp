@@ -13,16 +13,21 @@ Each package module is explained below, from lowest to highest abstraction.
 Each message between client and server is a "frame", which looks like:
 
 ```js
-{
+var frame = {
   command: "string",
   headers: { "string": "string" },
   body: "string",
 }
+
+var text = Frame.toString(frame)
+frame = Frame.fromString(text)
 ```
 
 The STOMP protocol defines available commands and headers. `webstomp` checks if the command is valid. 
 
 ### Socket
+
+The `webstomp` Socket encodes and decodes frames. Otherwise, you'd have to call `toString` and `fromString` on each send and receive. 
 
 ```js
 var WebSocket = require("ws")
@@ -46,6 +51,8 @@ socket.send({ command, headers, body }, function (err) {
 
 ### Server
 
+The `webstomp` Server emits Socket connections. Otherwise, you'd have to wrap each new WebSocket connection yourself. 
+
 ```js
 var {Server} = require("webstomp")
 
@@ -59,7 +66,7 @@ You're bored. Here's the useful bits coming up.
 
 ### Session
 
-Send frames by command name, encode javascript objects. 
+The `webstomp` Session adds a number of helpers. Otherwise you'd have to send full frames and stringify javascript objects. 
 
 ```js
 var {Session} = require("webstomp")
@@ -79,7 +86,7 @@ session.message(data, headers)
 session.error(new Error("sharp edges"))
 ```
 
-For real-time apps, it's practical to create lazy observables, and pipe them to the client on-demand. For example notifications could be an `es-observable`, `kefir` or `baconjs` stream, readable `event-stream`, etc. 
+For realtime apps, it's practical to model channels as lazy observables. Sessions can pipe observable events to the client as message frames. Examples include `es-observable`, `kefir` or `baconjs` stream, readable `event-stream`, etc.
 
 ```js
 // When client subscribes
@@ -91,7 +98,7 @@ unhook()
 
 ### Router
 
-It's designed to look like the express router. 
+The `webstomp` Router is designed to look like express. Instead of HTTP actions, you have STOMP actions. Instead of `(req, res, next)` you have `this (next)`.
 
 ```js
 var {Router} = require("webstomp")
@@ -135,7 +142,7 @@ router.use(anotherRouter)
 
 ### App
 
-The `webstomp` app ties it all together. It opens a WebSocket server, wraps it with a `webstomp` server, acts like a `webstomp` router, and dispatches server request frames to itself. 
+The `webstomp` App ties it all together. It creates a WebSocket server, wraps it with a `webstomp` Server, acts like a `webstomp` Router, and dispatches request Frames to the current Session. 
 
 ```js
 var {App} = require("webstomp")
@@ -153,9 +160,9 @@ app.use(function () {
 app.listen(8080)
 ```
 
-### Mount Http Server
+### Mount Server
 
-You can mount a `webstomp` server on an HTTP server, which allows you to use `express` too.
+You can mount a `webstomp` App onto an HTTP server, which allows you to use the HTTP server too. For example, with express:
 
 ```js
 var http = require("http")
@@ -171,6 +178,10 @@ server.listen(port, function () {
 })
 ```
 
-So that's the concept. For realtime apps on-demand PUB/SUB channels are very practical, and play nicely with React components. Please contribute ideas, bugs, etc. 
+So that's it. For realtime apps, on-demand PUB/SUB channels provide structure. The pattern maps well to server-side services that return an observable, and also client-side components that subscribe when added into view, and unsubscribe when removed. 
+
+### Open Source
+
+Please contribute ideas, bugs, etc. 
 
 **MIT License**
