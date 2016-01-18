@@ -7,12 +7,12 @@ bus = new EventEmitter()
 Kefir.fromEvents(bus, "message").log("database")
 
 app.connect ->
-  @context.user = true
-  @context.unsubscribe = []
+  @state.user = true
+  @state.unsubscribe = []
   @connected(session: "user-1")
 
-app.use "/messages", (self, next) ->
-  if @context.user
+app.use "/messages", (next) ->
+  if @state.user
     return next()
   next(new Error "not authenticated")
 
@@ -21,9 +21,10 @@ app.send "/messages", ->
 
 app.subscribe "/messages", ->
   unhook = @observe Kefir.fromEvents(bus, "message")
-  @context.unsubscribe.push unhook
+  @state.unsubscribe.push unhook
 
 app.disconnect ->
-  @context.unsubscribe.forEach (f) -> f()
+  @state.unsubscribe.forEach (f) -> f()
 
 app.listen(8080)
+console.log("app started wss://localhost:8080")
