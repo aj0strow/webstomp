@@ -12,7 +12,7 @@ class App extends Router
     
     dispatch = (frame) =>
       context = Object.create(session)
-      assign(context, frame, context: session.context)
+      assign(context, frame, state: session.state)
       @dispatch context, (err) =>
         if err
           @emit "error", err

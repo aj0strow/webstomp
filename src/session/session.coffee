@@ -4,7 +4,7 @@
 class Session extends EventEmitter
   constructor: (socket) ->
     @socket = socket
-    @context = {}
+    @state = {}
     @open = true
     
     socket.on "close", =>

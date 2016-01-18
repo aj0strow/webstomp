@@ -1,13 +1,14 @@
 {
-  "name": "stomp",
-  "version": "0.0.3",
+  "name": "webstomp",
+  "version": "0.0.4",
   "license": "MIT",
   "author": "@aj0strow",
-  "description": "STOMP protocol",
+  "description": "server framework for stomp over websockets",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aj0strow/stomp.git"
+    "url": "https://github.com/aj0strow/webstomp.git"
   },
+  "main": "./dist/index",
   "devDependencies": {
     "coffee-script": "^1.10.0",
     "del": "^2.1.0",
@@ -21,7 +22,8 @@
     "source-map-support": "^0.4.0"
   },
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp test",
+    "prepublish": "gulp compile"
   },
   "dependencies": {
     "async": "^1.5.0",

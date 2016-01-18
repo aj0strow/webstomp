@@ -33,11 +33,11 @@ describe "Stomp App", ->
     
     it "should proto inherit the session", (done) ->
       @app.use (next) ->
-        @context.ok = true
+        @state.ok = true
         next()
       
       @app.use (next) ->
-        assert @context.ok
+        assert @state.ok
         done()
       
       @socket.emit "message", {}
