@@ -1,6 +1,6 @@
 {
   "name": "webstomp",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "author": "@aj0strow",
   "description": "server framework for stomp over websockets",
