@@ -32,7 +32,8 @@ class Socket extends EventEmitter
     ws.on "message", (buffer) =>
       try
         frame = Frame.fromString(buffer)
-        @emit "message", frame
+        if frame
+          @emit "message", frame
       catch err
         @emit "error", err
     

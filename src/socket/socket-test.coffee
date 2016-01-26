@@ -46,6 +46,13 @@ describe "Stomp Socket", ->
         done()
       @ws.emit "message", packet
     
+    it "should ignore empty frames", (done) ->
+      packet = "\n"
+      @socket.on "message", (message) ->
+        throw new Error("this should not happen")
+      @ws.emit "message", packet
+      setImmediate(done)
+    
     it "should emit errors on bad data", (done) ->
       packet = [
         "CONNECT"
