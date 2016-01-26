@@ -26,14 +26,13 @@ describe "Stomp Frame", ->
   describe "fromString", ->
     it "should parse connect packet", ->
       packet = [
-        "CONNECT\n"
-        "accept-version:1.2\n"
-        "host:\n"
-        "login:ajostrow\n"
-        "passcode:secret\n"
-        "\n"
+        "CONNECT"
+        "host:"
+        "accept-version:1.2"
+        "login:ajostrow"
+        "passcode:secret"
         "\0"
-      ].join("")
+      ].join("\n")
       frame = Frame.fromString(packet)
       assert.equal frame.command, "CONNECT"
       assert.equal frame.headers["accept-version"], "1.2"
@@ -44,18 +43,40 @@ describe "Stomp Frame", ->
     
     it "should parse packet with body", ->
       packet = [
-        "SEND\n"
-        "destination:/orders\n"
-        "content-type:application/json; charset=utf-8\n"
-        "\n"
-        JSON.stringify(quantity: 10) + "\n"
+        "SEND"
+        "destination:/orders"
+        "content-type:application/json; charset=utf-8"
+        ""
+        JSON.stringify(quantity: 10)
         "\0"
-      ].join("")
+      ].join("\n")
       frame = Frame.fromString(packet)      
       assert.equal frame.command, "SEND"
       assert.equal frame.headers["destination"], "/orders"
       assert.equal frame.headers["content-type"], "application/json; charset=utf-8"
       assert.equal frame.body, '{"quantity":10}'
+    
+    it "should respect content length", ->
+      packet = [
+        "SEND"
+        "content-length:5"
+        ""
+        "hello world"
+        "\0"
+      ].join("\n")
+      frame = Frame.fromString(packet)
+      assert.equal frame.body, "hello"
+    
+    it "should fail if content length larger than body", ->
+      packet = [
+        "SEND"
+        "content-length:10"
+        ""
+        "hey man"
+        "\0"
+      ].join("\n")
+      assert.throws ->
+        Frame.fromString(packet)
     
     it "should should prefer earlier duplicate headers", ->
       packet = [

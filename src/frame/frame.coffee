@@ -20,6 +20,10 @@ exports.fromString = (s) ->
   unless s && s.length > 0
     return null
   
+  # Ignore heart beats
+  if s == "\n"
+    return null
+  
   # One-pass parse
   start = 0
   
@@ -28,14 +32,14 @@ exports.fromString = (s) ->
     # Parse line
     end = s.indexOf("\n", start)
     if end == -1
-      throw new Error("Invalid packet")
+      throw new Error("invalid packet command")
     
-    line = s.substr(start, end - start)
+    line = s.slice(start, end)
     start = end + 1
     
     # Break on bad input
     if start >= s.length
-      return null
+      throw new Error("invalid packet command")
     
     if line != ""
       command = line
@@ -47,7 +51,7 @@ exports.fromString = (s) ->
     end = s.indexOf("\n", start)
     if end == -1
       break
-    line = s.substr(start, end - start)
+    line = s.slice(start, end)
     start = end + 1
     
     # End of headers is empty line
@@ -56,11 +60,11 @@ exports.fromString = (s) ->
     
     sep = line.indexOf(":", 0)
     if sep == -1
-      throw new Error("Invalid header: " + line)
+      throw new Error("invalid header: " + line)
     
-    key = line.substr(0, sep)
+    key = line.slice(0, sep)
     unless headers[key]
-      value = line.substr(sep + 1)
+      value = line.slice(sep + 1)
       headers[key] = value
   
   if headers['content-length']
@@ -69,14 +73,14 @@ exports.fromString = (s) ->
   body = if headers['content-length']
     end = start + headers['content-length']
     if end > s.length
-      throw new Error("Content length incorrect")
-    s.substr(start, end)
+      throw new Error("invalid content length")
+    s.slice(start, end)
   else if s[start] != "\0"
     end = s.length - 1
     while s[end] == "\n" || s[end] == "\0"
       end -= 1      
       if end <= start
-        throw new Error("No frame terminator")
+        throw new Error("no frame terminator")
     s.slice(start, end + 1)
   else
     null
