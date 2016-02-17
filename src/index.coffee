@@ -1,11 +1,12 @@
 App = require "./app"
 
-create = ->
+webstomp = ->
   return new App()
 
-create.App = App
-create.Router = require "./router"
-create.Socket = require "./socket"
-create.Frame = require "./frame"
+webstomp.App = App
+webstomp.Router = require "./router"
+webstomp.Socket = require "./socket"
+webstomp.Frame = require "./frame"
+webstomp.Client = require "./client"
 
-module.exports = create
+module.exports = webstomp
