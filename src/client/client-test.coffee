@@ -48,3 +48,16 @@ describe "Client", ->
       @client.subscribe({ destination: "/two" })
       assert.notEqual ids[0], ids[1]
     
+  describe "unsubscribe", ->
+    it "should require headers", ->
+      assert.throws (=> @client.subscribe()), /headers/
+    
+    it "should require id", ->
+      assert.throws (=> @client.subscribe {}), /id/
+    
+    it "should map to unsubscribe command", ->
+      @socket.send = (frame) ->
+        assert.equal frame.command, "UNSUBSCRIBE"
+        assert.equal frame.headers["id"], "sub-1"
+      @client.unsubscribe(id: "sub-1")
+

@@ -29,4 +29,13 @@ class Client
       command: "SUBSCRIBE"
       headers: headers
 
+  unsubscribe: (headers) ->
+    unless headers
+      throw new Error("headers required")
+    unless headers["id"]
+      throw new Error("id header required")
+    @socket.send
+      command: "UNSUBSCRIBE"
+      headers: headers
+
 module.exports = Client
