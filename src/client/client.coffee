@@ -3,6 +3,7 @@
 class Client
   constructor: (socket) ->
     @socket = socket
+    @counter = 0
   
   send: (headers, body) ->
     unless headers
@@ -16,5 +17,16 @@ class Client
       command: "SEND"
       headers: headers
       body: body
+  
+  subscribe: (headers) ->
+    unless headers
+      throw new Error("headers required")
+    unless headers["destination"]
+      throw new Error("destination header required")
+    unless headers["id"]
+      headers["id"] = "sub-#{ @counter += 1 }"
+    @socket.send
+      command: "SUBSCRIBE"
+      headers: headers
 
 module.exports = Client
