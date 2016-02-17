@@ -3,7 +3,7 @@
 
 {assign, each} = require "lodash"
 
-exports.toString = ({command, headers, body}) ->  
+toString = ({command, headers, body}) ->  
   headers = assign({}, headers)
   if body
     headers['content-length'] = body.length
@@ -16,7 +16,7 @@ exports.toString = ({command, headers, body}) ->
   s += "\0"
   return s
 
-exports.fromString = (s) ->  
+fromString = (s) ->  
   unless s && s.length > 0
     return null
   
@@ -90,3 +90,5 @@ exports.fromString = (s) ->
     headers: headers
     body: body
   return frame
+
+module.exports = {toString, fromString}
