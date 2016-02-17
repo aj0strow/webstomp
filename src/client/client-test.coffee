@@ -50,10 +50,10 @@ describe "Client", ->
     
   describe "unsubscribe", ->
     it "should require headers", ->
-      assert.throws (=> @client.subscribe()), /headers/
+      assert.throws (=> @client.unsubscribe()), /headers/
     
     it "should require id", ->
-      assert.throws (=> @client.subscribe {}), /id/
+      assert.throws (=> @client.unsubscribe {}), /id/
     
     it "should map to unsubscribe command", ->
       @socket.send = (frame) ->
@@ -61,3 +61,16 @@ describe "Client", ->
         assert.equal frame.headers["id"], "sub-1"
       @client.unsubscribe(id: "sub-1")
 
+  describe "disconnect", ->
+    it "should map to disconnect command", ->
+      @socket.send = (frame) ->
+        assert.equal frame.command, "DISCONNECT"
+      @client.disconnect()
+    
+    it "should prevent sending more messages", ->
+      count = 0
+      @socket.send = (frame) ->
+        count += 1
+      @client.disconnect()
+      @client.send({ destination: "/hello" })
+      assert.equal count, 1
