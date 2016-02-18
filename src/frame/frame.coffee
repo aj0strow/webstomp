@@ -32,14 +32,14 @@ fromString = (s) ->
     # Parse line
     end = s.indexOf("\n", start)
     if end == -1
-      throw new Error("invalid packet command")
+      throw new Error("invalid command")
     
     line = s.slice(start, end)
     start = end + 1
     
     # Break on bad input
     if start >= s.length
-      throw new Error("invalid packet command")
+      throw new Error("invalid command")
     
     if line != ""
       command = line

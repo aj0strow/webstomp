@@ -46,7 +46,7 @@ class Socket extends EventEmitter
   send: (frame, onError) ->
     {command, body} = frame
     unless COMMANDS.has(command)
-      throw new Error("invalid command: #{ command }")
+      throw new Error("invalid command: #{command}")
     if body and !COMMANDS_WITH_BODY.has(command)
       throw new Error("invalid frame: #{command} must not have body")
     message = Frame.toString(frame)
