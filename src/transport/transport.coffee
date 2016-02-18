@@ -40,12 +40,9 @@ class Transport extends EventEmitter
     fromCallback (onError) =>
       @ws.send "\n", onError
   
-  autoHeartbeat: (x, y) ->
-    if x == 0 || y == 0
-      return
-    frequency = Math.max(x, y)
+  autoHeartbeat: (ms) ->
     sendHeartbeat = @sendHeartbeat.bind(this)
-    @heartbeat = setInterval sendHeartbeat, frequency
+    @heartbeat = setInterval sendHeartbeat, ms
   
   close: ->
     @ws.close()

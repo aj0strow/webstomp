@@ -90,21 +90,9 @@ describe "Transport", ->
       @ws.send = (message, fn) ->
         outbox.push message
         fn()
-      intid = @transport.autoHeartbeat(5, 5)
+      intid = @transport.autoHeartbeat(5)
       onTimeout = ->
         clearInterval intid
         assert.equal outbox.length, 2
         done()
       setTimeout onTimeout, 14
-    
-    it "should not send unwanted heartbeats", (done) ->
-      outbox = []
-      @ws.send = (message, fn) ->
-        outbox.push message
-        fn()
-      @transport.autoHeartbeat(5, 0)
-      onTimeout = ->
-        assert.equal outbox.length, 0
-        done()
-      setTimeout onTimeout, 9
-      
