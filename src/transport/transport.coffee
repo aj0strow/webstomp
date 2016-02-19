@@ -1,34 +1,43 @@
-EventEmitter = require "events"
 {fromCallback} = require "bluebird"
 Frame = require "../frame"
+Signal = require "../signal"
 
-class Transport extends EventEmitter
+class Transport
+  @events = ["open", "error", "close", "frame", "heartbeat"]
+  
   constructor: (websocket) ->
     @ws = websocket
     @heartbeat = null
     
+    @signals = {}
+    @constructor.events.forEach (event) =>
+      @signals[event] = new Signal()
+    
     @ws.on "open", =>
-      @emit "open"
+      @signals.open.emit()
     
     @ws.on "message", (message) =>
       @onMessage message
     
     @ws.on "error", (err) =>
-      @emit "error", err
+      @signals.error.emit(err)
     
     @ws.on "close", =>
       clearInterval @heartbeat
-      @emit "close"
+      @signals.close.emit()
+  
+  on: (name, fn) ->
+    @signals[name].addListener(fn)
   
   onMessage: (message) ->
     if /^\s*$/.test message
-      @emit "heartbeat"
+      @signals.heartbeat.emit()
     else
       try
         frame = Frame.fromString(message)
-        @emit "frame", frame
+        @signals.frame.emit(frame)
       catch err
-        @emit "error"
+        @signals.error.emit(err)
         @close()
   
   sendFrame: (frame) ->

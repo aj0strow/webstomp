@@ -22,9 +22,3 @@ describe "Signal", ->
     @signal.addListener fn
     @signal.removeListener fn
     @signal.emit {}
-  
-  it "should close to stop events", ->
-    @signal = new Signal()
-    @signal.close()
-    assert.throws ->
-      @signal.emit {}
