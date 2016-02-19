@@ -11,12 +11,10 @@ class Signal
 
   addListener: (fn) ->
     @listeners.push fn
-    @listeners.length
     undefined
 
   removeListener: (fn) ->
     pull @listeners, fn
-    @listeners.length
     undefined
 
 module.exports = Signal
