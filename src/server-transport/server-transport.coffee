@@ -1,4 +1,3 @@
-EventEmitter = require "events"
 Transport = require "../transport"
 
 class ServerTransport extends Transport
@@ -25,14 +24,12 @@ class ServerTransport extends Transport
     assertHeaders headers, [ "message" ]
 
 
-
 assertHeaders = (headers, names) ->
   unless headers
     throw new Error("headers required")
   for name in names
     unless headers[name]
       throw new Error("#{name} header required")
-
 
 
 module.exports = ServerTransport

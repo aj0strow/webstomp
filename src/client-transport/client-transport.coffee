@@ -32,14 +32,12 @@ class ClientTransport extends Transport
       headers: headers
 
 
-
 assertHeaders = (headers, names) ->
   unless headers
     throw new Error("headers required")
   for name in names
     unless headers[name]
       throw new Error("#{name} header required")
-
 
 
 module.exports = ClientTransport
