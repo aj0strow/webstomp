@@ -22,6 +22,10 @@ class ServerTransport extends Transport
   
   error: (headers, body) ->
     assertHeaders headers, [ "message" ]
+    @sendFrame
+      command: "ERROR"
+      headers: headers
+      body: body
 
 
 assertHeaders = (headers, names) ->
