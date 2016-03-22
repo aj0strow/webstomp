@@ -1,43 +1,53 @@
-{fromCallback} = require "bluebird"
-Frame = require "../frame"
 Signal = require "../signal"
+Frame = require "../frame"
+{fromCallback} = require "bluebird"
 
 class Transport
-  @events = ["open", "error", "close", "frame", "heartbeat"]
+  @events = ["open", "message", "frame", "heartbeat", "error", "close"]
   
-  constructor: (websocket) ->
-    @ws = websocket
+  constructor: (ws) ->
+    @ws = ws
     @heartbeat = null
-    
     @signals = {}
-    @constructor.events.forEach (event) =>
-      @signals[event] = new Signal()
+    
+    # init signals
+    
+    @constructor.events.forEach (name) =>
+      @signals[name] = new Signal()
+    
+    # proxy websocket events
     
     @ws.on "open", =>
-      @signals.open.emit()
+      @signals.open.emit true
     
     @ws.on "message", (message) =>
-      @onMessage message
+      @receiveMessage message
     
     @ws.on "error", (err) =>
-      @signals.error.emit(err)
+      @signals.error.emit err
     
     @ws.on "close", =>
       clearInterval @heartbeat
-      @signals.close.emit()
+      @signals.close.emit true
   
   on: (name, fn) ->
+    @addListener(name, fn)
+  
+  addListener: (name, fn) ->
     @signals[name].addListener(fn)
   
-  onMessage: (message) ->
+  removeListener: (name, fn) ->
+    @signals[name].removeListener(fn)
+  
+  receiveMessage: (message) ->
     if /^\s*$/.test message
-      @signals.heartbeat.emit()
+      @signals.heartbeat.emit true
     else
       try
         frame = Frame.fromString(message)
-        @signals.frame.emit(frame)
+        @signals.frame.emit frame
       catch err
-        @signals.error.emit(err)
+        @signals.error.emit err
         @close()
   
   sendFrame: (frame) ->
