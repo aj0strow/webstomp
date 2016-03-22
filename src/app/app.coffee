@@ -1,39 +1,52 @@
+Signal = require "../signal"
 Router = require "../router"
-Session = require "../session"
 Server = require "../server"
 {assign} = require "lodash"
 
-class App extends Router
-  accept: (socket) ->
-    session = new Session(socket)
+class App
+  @events = ["error"]
+  
+  constructor: ->
+    @router = new Router()
     
-    session.on "error", (err) =>
-      @emit "error", err
+    @signals = {}
+    @constructor.events.forEach (name) =>
+      @signals[name] = new Signal()
+    
+  accept: (transport) ->
+    transport.on "error", (err) =>
+      @signals.error.emit err
+    
+    state = {}
     
     dispatch = (frame) =>
-      context = Object.create(session)
-      assign(context, frame, state: session.state)
-      @dispatch context, (err) =>
+      context = Object.create(transport)
+      assign(context, frame, { state: state })
+      
+      @router.dispatch context, (err) =>
         if err
-          @emit "error", err
+          @signals.error.emit err
     
-    socket.on "message", (frame) ->
+    transport.on "frame", (frame) ->
       dispatch frame
     
-    socket.on "close", ->
-      # Ensure disconnect is called at least once
-      frame = 
+    transport.on "close", ->
+      dispatch
         command: "DISCONNECT"
         headers: {}
-      dispatch frame
+    
     return null
   
   mount: (params) ->
     server = new Server(params)
-    server.on "connection", @accept.bind(@)
+    server.on "connection", @accept.bind(this)
     return server
   
   listen: (port) ->
     return @mount(port: port)
+
+Router.commands.concat([ "use" ]).forEach (name) ->
+  App.prototype[name] = ->
+    @router[name].apply(@router, arguments)
 
 module.exports = App

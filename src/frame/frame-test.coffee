@@ -1,7 +1,7 @@
 assert = require "assert"
 Frame = require "./frame"
 
-describe "Stomp Frame", ->
+describe "Frame", ->
   describe "toString", ->
     it "should serialize connected", ->
       packet = Frame.toString

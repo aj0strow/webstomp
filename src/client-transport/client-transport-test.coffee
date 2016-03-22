@@ -2,7 +2,7 @@ EventEmitter = require "events"
 assert = require "assert"
 ClientTransport = require "./client-transport"
 
-describe "Client Transport", ->
+describe "ClientTransport", ->
   beforeEach ->
     @ws = new EventEmitter()
     @transport = new ClientTransport(@ws)

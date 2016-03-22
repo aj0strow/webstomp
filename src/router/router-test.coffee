@@ -1,7 +1,7 @@
 Router = require "./router"
 assert = require "assert"
 
-describe "Stomp Router", ->
+describe "Router", ->
   beforeEach ->
     @router = new Router()
 
@@ -27,15 +27,22 @@ describe "Stomp Router", ->
     @router.dispatch({ headers }, done)
 
   it "should match on command", (done) ->
-    @router.subscribe "*", (next) ->
-      assert.fail()
+    @router.subscribe (next) ->
+      assert.fail("invalid path")
     
     @router.connect (next) ->
-      done()
+      @state.ok = true
+      next()
+    
+    @router.use (next) ->
+      assert @state.ok
+      next()
     
     context = 
       command: "CONNECT"
       headers: {}
+      state: {}
+    
     @router.dispatch(context, done)
 
   it "should match on command and path", (done) ->
@@ -43,11 +50,18 @@ describe "Stomp Router", ->
       assert.fail()
       
     @router.send "/message", (next) ->
+      @state.ok = true
+      next()
+    
+    @router.use (next) ->
+      assert @state.ok
       next()
       
     context =
       command: "SEND"
       headers: { "destination": "/message" }
+      state: {}
+    
     @router.dispatch(context, done)
 
   it "should mount routers", (done) ->

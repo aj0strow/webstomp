@@ -1,36 +1,47 @@
 App = require "./app"
 {EventEmitter} = require "events"
-Sinon = require "sinon-commonjs"
+sinon = require "sinon-commonjs"
 assert = require "assert"
-portfinder = require "portfinder"
 WebSocket = require "ws"
-Socket = require "../socket"
 http = require "http"
+ClientTransport = require "../client-transport"
+ServerTransport = require "../server-transport"
 
-describe "Stomp App", ->
+portfinder = require "portfinder"
+bluebird = require "bluebird"
+findOpenPort = bluebird.promisify(portfinder.getPort)
+
+describe "App", ->
   describe "accept", ->
     beforeEach ->
-      @socket = new EventEmitter()
-      @socket.send = Sinon.spy()
       @app = new App()
-      @app.accept @socket
+      
+      @socket = new EventEmitter()
+      @transport = new ServerTransport(@socket)
+      @transport.sendFrame = sinon.spy()
+      @transport.emit = (name, data) ->
+        @signals[name].emit(data)
+      
+      @app.accept @transport
 
     it "should dispatch socket messages", ->
       @app.connect (next) ->
-        @connected()
+        @connected
+          "version": "1.2"
+          "heart-beat": "0,0"
       
-      frame = 
+      connect =
         command: "CONNECT"
         headers: {}
-      @socket.emit "message", frame
       
-      assert @socket.send.called
+      @transport.emit "frame", connect
+      assert @transport.sendFrame.called
 
     it "should fire disconnect at least once", (done) ->
       @app.disconnect ->
         done()
-      @socket.emit "close"
-    
+      @transport.emit "close"
+
     it "should proto inherit the session", (done) ->
       @app.use (next) ->
         @state.ok = true
@@ -40,7 +51,7 @@ describe "Stomp App", ->
         assert @state.ok
         done()
       
-      @socket.emit "message", {}
+      @transport.emit "frame", {}
   
   describe "mount", ->
     it "should attach to params for wss", ->
@@ -49,12 +60,9 @@ describe "Stomp App", ->
       app.mount(server: httpServer)
   
   describe "listen", ->
-    beforeEach (done) ->
-      portfinder.getPort (err, port) =>
-        if err
-          return done(err)
+    beforeEach ->
+      findOpenPort().then (port) =>
         @port = port
-        done()
     
     it "should accept connections", (done) ->
       @app = new App()
@@ -64,13 +72,10 @@ describe "Stomp App", ->
         server.close()
       
       ws = new WebSocket("ws://localhost:#{ @port }")
+      transport = new ClientTransport(ws)
       
-      socket = new Socket(ws)
-      socket.on "open", ->
-        socket.send
-          command: "CONNECT"
+      transport.on "open", ->
+        transport.connect { "accept-version": "1.2", "host": "test" }
       
-      socket.on "close", ->
+      transport.on "close", ->
         done()
-    
-      

@@ -1,9 +1,7 @@
-{EventEmitter} = require "events"
 pathToRegexp = require "path-to-regexp"
 async = require "async"
-Server = require "../server"
 
-COMMANDS = [
+commands = [
   "connect"
   "send"
   "subscribe"
@@ -11,7 +9,9 @@ COMMANDS = [
   "disconnect"
 ]
 
-class Router extends EventEmitter
+class Router
+  @commands = commands
+  
   constructor: ->
     @routes = []
   
@@ -19,39 +19,39 @@ class Router extends EventEmitter
     iterator = (route, next) ->
       route.call(context, next)
     async.eachSeries @routes, iterator, next
-
-  use: (path, func) ->
-    unless path && func
-      func ||= path
+  
+  use: (path, fn) ->
+    unless path && fn
+      fn ||= path
       path = null
     route = switch
-      when func instanceof Router
+      when fn instanceof Router
         (next) ->
-          func.dispatch(this, next)
+          fn.dispatch(this, next)
       when path
-        withPath(func, path)
+        withPath(path, fn)
       else
-        func
+        fn
     @routes.push route
 
-COMMANDS.forEach (command) ->
-  Router.prototype[command] = (path, func) ->
-    unless path && func
-      func ||= path
+Router.commands.forEach (command) ->
+  Router.prototype[command] = (path, fn) ->
+    unless path && fn
+      fn ||= path
       path = null
-    @use path, withCommand(func, command.toUpperCase())
+    @use path, withCommand(command.toUpperCase(), fn)
 
-withPath = (func, path) ->
-  # Parse path regexp
+withPath = (path, fn) ->
+  # parse path regexp
   keys = []
   re = pathToRegexp path, keys
   emitter = this
   
-  # Check path and populate params
+  # check path and populate params
   return (next) ->
     params = {}
     
-    # Early exit if wrong type of command
+    # exit if wrong type of command
     path = @headers["destination"]
     return next() unless path
     
@@ -64,13 +64,13 @@ withPath = (func, path) ->
       params[key.name] = match[i + 1]
     @params = params
     
-    # Proxy func finally
-    func.apply(this, arguments)
+    # proxy func finally
+    fn.call(this, next)
 
-withCommand = (func, command) ->
+withCommand = (command, fn) ->
   return (next) ->
     if @command == command
-      func.apply(this, arguments)
+      fn.call(this, next)
     else
       next()
 

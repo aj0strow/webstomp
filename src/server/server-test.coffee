@@ -1,42 +1,58 @@
 Server = require "./server"
 WebSocket = require "ws"
-Socket = require "../socket"
+ClientTransport = require "../client-transport"
 assert = require "assert"
 portfinder = require "portfinder"
 
-describe "Stomp Server", ->
-  beforeEach (done) ->
-    portfinder.getPort (err, port) =>
-      if err
-        return done(err)
+bluebird = require "bluebird"
+findOpenPort = bluebird.promisify(portfinder.getPort)
+
+describe "Server", ->
+  beforeEach ->
+    findOpenPort().then (port) =>
       @port = port
+  
+  it "should emit listening event", (done) ->
+    server = new Server(port: @port)
+    server.on "listening", =>
+      server.close()
       done()
   
-  it "should emit sockets", (done) ->
+  it "should emit errors", (done) ->
+    server1 = new Server(port: @port)
+    server2 = new Server(port: @port)
+    server2.on "error", (err) =>
+      assert.equal err.code, "EADDRINUSE"
+      server1.close()
+      done()
+  
+  it "should emit transports", (done) ->
     server = new Server(port: @port)
-    server.on "connection", (socket) ->      
-      socket.on "message", ->
-        frame = 
+    
+    server.on "connection", (transport) ->
+      transport.on "frame", (frame) ->
+        assert.equal frame.command, "CONNECT"
+        response =
           command: "CONNECTED"
           headers: { "version": "1.2" }
-        
-        socket.send frame, (err) ->
-          done(new Error("server send error")) if err
-          
+        transport.sendFrame response
+          .catch done
     
     ws = new WebSocket("ws://localhost:#{ @port }")
-    socket = new Socket(ws)
+    transport = new ClientTransport(ws)
     
-    socket.on "open", ->      
-      socket.on "message", (frame) ->
-        assert.equal frame.command, "CONNECTED"
-        server.close()
-        done()
-      
-      frame =
+    transport.on "open", ->      
+      request =
         command: "CONNECT"
-        headers: { "accept-version": "1.2" }
-      socket.send frame, (err) ->
-        done(new Error("client send error")) if err        
-
-
+        headers: { "server": "test", "accept-version": "1.2" }
+      transport.sendFrame request
+        .catch done
+    
+    transport.on "frame", (frame) ->
+      assert.equal frame.command, "CONNECTED"
+      server.close()
+    
+    transport.on "error", done
+    
+    transport.on "close", ->
+      done()
