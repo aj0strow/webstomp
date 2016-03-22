@@ -12,7 +12,16 @@ class App
     @signals = {}
     @constructor.events.forEach (name) =>
       @signals[name] = new Signal()
-    
+  
+  on: (name, fn) ->
+    @addListener(name, fn)
+  
+  addListener: (name, fn) ->
+    @signals[name].addListener(fn)
+  
+  removeListener: (name, fn) ->
+    @signals[name].removeListener(fn)
+  
   accept: (transport) ->
     transport.on "error", (err) =>
       @signals.error.emit err

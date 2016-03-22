@@ -1,42 +1,42 @@
 WebSocket = require "ws"
-{Socket} = require("../../src")
+{ClientTransport} = require "../../src"
 
 ws = new WebSocket("ws://localhost:8080")
-socket = new Socket(ws)
+transport = new ClientTransport(ws)
 
-socket.on "message", (frame) ->
-  console.log "message", frame
 
-socket.on "error", (err) ->
-  console.error err
 
-socket.on "open", ->
+transport.on "frame", (frame) ->
+  console.log "frame", frame
+
+transport.on "error", (err) ->
+  console.log "error", err
+
+transport.on "close", ->
+  console.log "closed"
+
+transport.on "open", ->
+  console.log("open")
   connect = ->
-    socket.send
-      command: "CONNECT"
-      headers: {}
-
+    transport.connect
+      "host": "chatapp"
+      "accept-version": "1.2"
+      "heart-beat": "0,0"
   setTimeout connect, 10
 
   subscribe = ->
-    socket.send
-      command: "SUBSCRIBE"
-      headers:
-        destination: "/messages"
-
+    transport.subscribe
+      id: "sub-1"
+      destination: "/messages"
   setTimeout subscribe, 15
 
-  post = ->
-    socket.send
-      command: "SEND"
-      headers:
-        destination: "/messages"
-      body: "hello"
-
-  [ 120, 180 ].forEach (n) ->
-    setTimeout post, n
+  post = (message) ->
+    transport.send({ destination: "/messages" }, message)
+  
+  setTimeout((-> post("help")), 120)
+  setTimeout((-> post("thanks")), 180)
 
   disconnect = ->
-    socket.close()
-
-  setTimeout disconnect, 3000
+    transport.close()
+  
+  setTimeout(disconnect, 2000)

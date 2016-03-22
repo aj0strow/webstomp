@@ -1,30 +1,53 @@
 {EventEmitter} = require "events"
+webstomp = require "../../src"
+{each} = require "lodash"
 Kefir = require "kefir"
 
-app = require("../../src")()
-
+app = webstomp()
 bus = new EventEmitter()
-Kefir.fromEvents(bus, "message").log("database")
 
 app.connect ->
   @state.user = true
-  @state.unsubscribe = []
-  @connected(session: "user-1")
+  @state.hooks = {}
+  @state.message = 0
+  
+  console.log(">> client")
+  
+  @connected
+    host: "test"
+    session: "user-1"
+    version: "1.2"
 
-app.use "/messages", (next) ->
+app.disconnect ->
+  console.log("<< client")
+  each @state.hooks, (fn) -> fn()
+
+app.use (next) ->
   if @state.user
-    return next()
-  next(new Error "not authenticated")
+    next()
+  else
+    next(new Error("invalid auth"))
 
 app.send "/messages", ->
   bus.emit "message", @body
 
-app.subscribe "/messages", ->
-  unhook = @observe Kefir.fromEvents(bus, "message")
-  @state.unsubscribe.push unhook
-
-app.disconnect ->
-  @state.unsubscribe.forEach (f) -> f()
+app.subscribe "/messages", ->  
+  stream = Kefir.fromEvents(bus, "message")
+  
+  sendMessage = (message) =>
+    console.log("[message]", message)
+    @message({
+      subscription: @headers.id
+      destination: "/messages"
+      "message-id": "m-#{ @state.message += 1 }"
+    }, message)
+  stream.onValue(sendMessage)
+  @state.hooks[@headers.id] = ->
+    stream.offValue(sendMessage)
 
 app.listen(8080)
-console.log("app started wss://localhost:8080")
+
+app.on "error", (err) ->
+  console.error(err)
+
+console.log("app started ws://localhost:8080")
