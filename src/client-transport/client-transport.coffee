@@ -25,6 +25,9 @@ class ClientTransport extends Transport
 
   unsubscribe: (headers) ->
     assertHeaders headers, [ "id" ]
+    @sendFrame
+      command: "UNSUBSCRIBE"
+      headers: headers
 
   disconnect: (headers) ->
     @sendFrame
